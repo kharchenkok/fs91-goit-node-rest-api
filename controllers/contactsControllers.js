@@ -1,62 +1,40 @@
-import contactsService from "../services/contactsServices.js";
-import tryCatchWrapper from "../helpers/tryCatchWrapper.js";
-import HttpError from "../helpers/HttpError.js";
-
 import {
-  createContactSchema,
-  updateContactSchema,
-} from "../schemas/contactsSchemas.js";
-
-const {
-  listContacts,
-  getContactById,
-  removeContact,
   addContact,
+  getContactById,
+  listContacts,
+  removeContact,
   updateContactById,
-} = contactsService;
+  updateStatusContact,
+} from "../services/contactsServices.js";
+import tryCatchWrapper from "../helpers/tryCatchWrapper.js";
+
 export const getAllContacts = tryCatchWrapper(async (req, res) => {
   const contacts = await listContacts();
   res.status(200).json(contacts);
 });
 
 export const getOneContact = tryCatchWrapper(async (req, res) => {
-  const contactId = req.params.id;
-  const contact = await getContactById(contactId);
-  if (!contact) throw HttpError(404);
+  const contact = await getContactById(req.params.id);
   res.status(200).json(contact);
 });
 
 export const deleteContact = tryCatchWrapper(async (req, res) => {
   const contactId = req.params.id;
   const removedContact = await removeContact(contactId);
-
-  if (!removedContact) throw HttpError(404);
-
   res.status(200).json(removedContact);
 });
 
 export const createContact = tryCatchWrapper(async (req, res) => {
-  const { value, error } = createContactSchema(req.body);
-  if (error) throw HttpError(400, error.message);
-  const { name, email, phone } = value;
-
-  const newContact = await addContact(name, email, phone);
+  const newContact = await addContact(req.body);
   res.status(201).json(newContact);
 });
 
 export const updateContact = tryCatchWrapper(async (req, res) => {
-  const { value, error } = updateContactSchema(req.body);
-  if (error) throw HttpError(400, error.message);
+  const updatedContact = await updateContactById(req.params.id, req.body);
+  res.status(200).json(updatedContact);
+});
 
-  const contactId = req.params.id;
-  const { name, email, phone } = value;
-
-  if (!name && !email && !phone)
-    throw HttpError(400, "Body must have at least one field");
-
-  const updatedContact = await updateContactById(contactId, value);
-
-  if (!updatedContact) throw HttpError(404);
-
+export const updateContactStatus = tryCatchWrapper(async (req, res) => {
+  const updatedContact = await updateStatusContact(req.params.id, req.body);
   res.status(200).json(updatedContact);
 });
