@@ -15,7 +15,7 @@ export const updateContactSchema = (data) =>
   Joi.object()
     .options({ abortEarly: false })
     .keys({
-      name: Joi.string(),
+      name: Joi.string().min(2),
       email: Joi.string().email(),
       phone: Joi.string(),
       favorite: Joi.boolean(),

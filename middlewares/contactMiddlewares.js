@@ -7,25 +7,13 @@ import {
 import HttpError from "../helpers/HttpError.js";
 import { Contact } from "../models/contactModel.js";
 
-const checkContactExists = async (value) => {
-  const contactExists = await Contact.exists({
-    $or: [{ email: value.email }, { phone: value.phone }],
-  });
-  if (contactExists)
-    throw HttpError(409, "Contact with this email or phone already exists.");
+export const checkCreateContactData = (req, res, next) => {
+  const { value, error } = createContactSchema(req.body);
+  if (error) throw HttpError(400, error.message);
+
+  req.body = value;
+  next();
 };
-
-export const checkCreateContactData = tryCatchWrapper(
-  async (req, res, next) => {
-    const { value, error } = createContactSchema(req.body);
-
-    if (error) throw HttpError(400, error.message);
-
-    await checkContactExists(value);
-    req.body = value;
-    next();
-  },
-);
 
 export const checkContactId = tryCatchWrapper(async (req, res, next) => {
   const { id } = req.params;
@@ -36,20 +24,16 @@ export const checkContactId = tryCatchWrapper(async (req, res, next) => {
   next();
 });
 
-export const checkUpdateContactData = tryCatchWrapper(
-  async (req, res, next) => {
-    const { value, error } = updateContactSchema(req.body);
-    if (error) throw HttpError(400, error.message);
-    const { name, email, phone } = value;
-    if (!name && !email && !phone)
-      throw HttpError(400, "Body must have at least one field");
+export const checkUpdateContactData = (req, res, next) => {
+  const { value, error } = updateContactSchema(req.body);
+  if (error) throw HttpError(400, error.message);
 
-    await checkContactExists(value);
+  if (Object.keys(value).length === 0)
+    throw HttpError(400, "Body must have at least one field");
 
-    req.body = value;
-    next();
-  },
-);
+  req.body = value;
+  next();
+};
 
 export const checkFavoriteField = (req, res, next) => {
   const { favorite } = req.body;

@@ -9,11 +9,9 @@ const contactSchema = new Schema(
     },
     email: {
       type: String,
-      unique: [true, "Email already exists"],
     },
     phone: {
       type: String,
-      unique: [true, "Phone already exists"],
     },
     favorite: {
       type: Boolean,

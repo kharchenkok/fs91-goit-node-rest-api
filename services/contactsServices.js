@@ -13,6 +13,7 @@ function removeContact(contactId) {
 }
 
 function addContact(contactData) {
+  console.log("Contact Data:", contactData);
   return Contact.create(contactData);
 }
 
